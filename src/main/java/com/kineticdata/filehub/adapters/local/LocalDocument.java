@@ -62,7 +62,7 @@ public class LocalDocument implements Document {
 
     @Override
     public String getPath() {
-        return absoluteDocumentPath.toString().substring(filestoreRootPath.toString().length()+1);
+        return absoluteDocumentPath.toString().substring(filestoreRootPath.toString().length()+1).replaceAll("\\\\","/");
     }
 
     @Override
