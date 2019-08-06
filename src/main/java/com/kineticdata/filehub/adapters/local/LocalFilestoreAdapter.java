@@ -71,8 +71,31 @@ public class LocalFilestoreAdapter implements FilestoreAdapter {
      */
     @Override
     public void initialize(Map<String, String> propertyValues) {
+        // Ensure the directory is normalized
+        if (propertyValues.containsKey(Properties.DIRECTORY)) {
+            Path normalizedDirectoryPath = Paths.get(propertyValues.get(Properties.DIRECTORY)).normalize();
+            propertyValues.put(Properties.DIRECTORY, normalizedDirectoryPath.toString());
+        }
         // Set the configurable properties
         properties.setValues(propertyValues);
+
+        // Prepare the root directory if it doesn't exist
+        Path filestoreRootPath = Paths.get(properties.getValue(Properties.DIRECTORY));
+        if (!filestoreRootPath.toFile().exists()) {
+            if (filestoreRootPath.getParent() == null) {
+                throw new RuntimeException(Properties.DIRECTORY+
+                    " \""+properties.getValue(Properties.DIRECTORY)+"\" "+
+                    "is invalid because it doesn't exist, and neither does the parent.");
+            } else {
+                try {
+                    Files.createDirectory(filestoreRootPath);
+                } catch (IOException e) {
+                    throw new RuntimeException(Properties.DIRECTORY+
+                        " \""+properties.getValue(Properties.DIRECTORY)+"\" "+
+                        "is invalid because it doesn't exist and could not be created.", e);
+                }
+            }
+        }
     }
 
     /**
